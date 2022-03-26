@@ -1,14 +1,34 @@
 import express, { Application, Request, Response } from "express";
+import * as http from 'http';
+import {Server} from 'socket.io';
+import helmet from 'helmet';
+import cors from 'cors';
+import authRoutes from './routes/authRoutes';
 
 const app: Application = express();
-const port = 5000;
+const port = 4000;
 
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:3000",
+        credentials: true
+    }
+});
+
+app.use(helmet());
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get(
-    "/",
-    async (req: Request, res: Response): Promise<Response> => {
+app.use("/auth", authRoutes)
+
+io.on('connect', (socket) => {})
+
+app.get("/", async (req: Request, res: Response): Promise<Response> => {
         return res.status(200).send({
             message: "Hello World!",
         });
