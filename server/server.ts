@@ -4,6 +4,8 @@ import {Server} from 'socket.io';
 import helmet from 'helmet';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes';
+import session from 'express-session';
+import 'dotenv/config';
 
 const app: Application = express();
 const port = 4000;
@@ -22,6 +24,18 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
+app.use(session({
+    secret: process.env.COOKIE_SECRET!,
+    name: "sid",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.ENVIRONMENT === "production" ? true : "auto",
+        httpOnly: true,
+        // expires: 1000 * 60 * 60 * 24 * 7,
+        sameSite: process.env.ENVIRONMENT === "production" ? "none" : "lax",
+    }
+}));
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRoutes)
