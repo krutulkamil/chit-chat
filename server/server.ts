@@ -5,6 +5,8 @@ import helmet from 'helmet';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes';
 import session from 'express-session';
+import Redis from "ioredis";
+import connectRedis from 'connect-redis';
 import 'dotenv/config';
 
 const app: Application = express();
@@ -18,6 +20,9 @@ const io = new Server(server, {
     }
 });
 
+const RedisStore = connectRedis(session);
+const redisClient = new Redis();
+
 app.use(helmet());
 app.use(cors({
     origin: "http://localhost:3000",
@@ -27,6 +32,7 @@ app.use(express.json());
 app.use(session({
     secret: process.env.COOKIE_SECRET!,
     name: "sid",
+    store: new RedisStore({client: redisClient}),
     resave: false,
     saveUninitialized: false,
     cookie: {
