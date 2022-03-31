@@ -6,15 +6,23 @@ import {
     Button,
     FormErrorMessage,
     Input,
-    Heading
+    Heading,
+    Text
 } from "@chakra-ui/react";
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
 import {useNavigate} from "react-router-dom";
 import {ArrowBackIcon} from "@chakra-ui/icons";
+import {AccountContext} from "../AccountContext";
+import {useContext, useState} from "react";
 
 const SignUp = () => {
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const ctx = useContext(AccountContext);
+    if (!ctx) return null;
+    const {setUser} = ctx;
+
     return (
         <Formik
             initialValues={{ username: "", password: "" }}
@@ -42,14 +50,19 @@ const SignUp = () => {
                     return;
                 })
                     .then(res => {
-                    if (!res || !res.ok || res.status >= 200) {
+                    if (!res || !res.ok || res.status >= 400) {
                         return;
                     }
                     return res.json();
                 })
                     .then(data => {
                         if (!data) return;
-                        console.log(data);
+                        setUser({ ...data });
+                        if (data.status) {
+                            setError(data.status);
+                        } else if (data.loggedIn) {
+                            navigate("/home");
+                        }
                     });
 
                 actions.resetForm();
@@ -65,7 +78,7 @@ const SignUp = () => {
                     spacing="1rem"
                 >
                     <Heading>Sign Up</Heading>
-
+                    <Text as="p" color="red.500">{error}</Text>
                     <FormControl isInvalid={formik.touched.username && Boolean(formik.errors.username)}>
                         <FormLabel fontSize="lg">Username</FormLabel>
                         <Input

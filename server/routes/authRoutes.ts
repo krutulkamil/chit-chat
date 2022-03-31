@@ -16,28 +16,36 @@ declare module 'express-session' {
     }
 }
 
-router.post("/login", async (req: Request, res: Response) => {
-    validateForm(req, res);
-
-    const potentialLogin = await pool.query(
-        "SELECT id, username, passhash FROM users u WHERE u.username=$1",
-        [req.body.username]);
-
-    if (potentialLogin.rowCount > 0) {
-        const isSamePass = await bcrypt.compare(req.body.password, potentialLogin.rows[0].passhash);
-        if (isSamePass) {
-            req.session.user = {
-                username: req.body.username,
-                id: potentialLogin.rows[0].id
-            }
-            res.json({ loggedIn: true, username: req.body.username });
+router.route("/login")
+    .get(async (req: Request, res: Response) => {
+        if (req.session.user && req.session.user.username) {
+            res.json({ loggedIn: true, username: req.session.user.username });
         } else {
-            res.json({ loggedIn: false, status: "Wrong login or password!" });
+            res.json({ loggedIn: false});
         }
-    } else {
-        res.json({ loggedIn: false, status: "Wrong login or password!" });
-    }
-});
+    })
+    .post(async (req: Request, res: Response) => {
+        validateForm(req, res);
+
+        const potentialLogin = await pool.query(
+            "SELECT id, username, passhash FROM users u WHERE u.username=$1",
+            [req.body.username]);
+
+        if (potentialLogin.rowCount > 0) {
+            const isSamePass = await bcrypt.compare(req.body.password, potentialLogin.rows[0].passhash);
+            if (isSamePass) {
+                req.session.user = {
+                    username: req.body.username,
+                    id: potentialLogin.rows[0].id
+                }
+                res.json({loggedIn: true, username: req.body.username});
+            } else {
+                res.json({loggedIn: false, status: "Wrong login or password!"});
+            }
+        } else {
+            res.json({loggedIn: false, status: "Wrong login or password!"});
+        }
+    });
 
 router.post("/signup", async (req: Request, res: Response) => {
     validateForm(req, res);
@@ -57,7 +65,7 @@ router.post("/signup", async (req: Request, res: Response) => {
             id: newUserQuery.rows[0].id
         };
 
-        res.json({loggedIn: false, username: req.body.username});
+        res.json({loggedIn: true, username: req.body.username});
     } else {
         res.json({loggedIn: false, status: "Username taken"});
     }

@@ -32,15 +32,15 @@ app.use(session({
     cookie: {
         secure: process.env.ENVIRONMENT === "production" ? true : "auto",
         httpOnly: true,
-        // expires: 1000 * 60 * 60 * 24 * 7,
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
         sameSite: process.env.ENVIRONMENT === "production" ? "none" : "lax",
     }
 }));
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/auth", authRoutes)
+app.use("/auth", authRoutes);
 
-io.on('connect', (socket) => {})
+io.on('connect', (socket) => {});
 
 app.get("/", async (req: Request, res: Response): Promise<Response> => {
         return res.status(200).send({
