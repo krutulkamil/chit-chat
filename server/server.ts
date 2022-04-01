@@ -5,9 +5,9 @@ import helmet from 'helmet';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes';
 import session from 'express-session';
-import Redis from "ioredis";
 import connectRedis from 'connect-redis';
 import 'dotenv/config';
+import redisClient from "./redis";
 
 const app: Application = express();
 const port = 4000;
@@ -21,7 +21,6 @@ const io = new Server(server, {
 });
 
 const RedisStore = connectRedis(session);
-const redisClient = new Redis();
 
 app.use(helmet());
 app.use(cors({

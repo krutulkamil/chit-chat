@@ -21,7 +21,6 @@ const validateForm = (req: Request, res: Response, next: NextFunction) => {
         })
         .then(valid => {
             if (valid) {
-                console.log("form is good");
                 next();
             } else {
                 res.status(422).send();
