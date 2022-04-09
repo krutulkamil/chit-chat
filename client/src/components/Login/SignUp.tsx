@@ -19,9 +19,7 @@ import {useContext, useState} from "react";
 const SignUp = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const ctx = useContext(AccountContext);
-    if (!ctx) return null;
-    const {setUser} = ctx;
+    const {setUser} = useContext(AccountContext);
 
     return (
         <Formik

@@ -5,20 +5,20 @@ import SignUp from "./Login/SignUp";
 import {Text} from "@chakra-ui/layout";
 import PrivateRoutes from "./PrivateRoutes";
 import {AccountContext} from "./AccountContext";
+import Home from "./Home/Home";
 
 const Views: FC = (): JSX.Element | null => {
-    const ctx = useContext(AccountContext);
-    if (!ctx) return null;
-    const {user} = ctx;
+
+    const {user} = useContext(AccountContext);
 
     //TODO: React Spinner // Loading screen instead of rendering null
 
     return user.loggedIn === null ? null : (
         <Routes>
-            <Route path="/" element={<Login/>}/>
-            <Route path="/register" element={<SignUp/>}/>
+            <Route path="/" element={<Login />}/>
+            <Route path="/register" element={<SignUp />}/>
             <Route element={<PrivateRoutes/>}>
-                <Route path="/home" element={<Text>Welcome Home!</Text>}/>
+                <Route path="/home" element={<Home />}/>
             </Route>
             <Route path="*" element={<Login/>}/>
         </Routes>

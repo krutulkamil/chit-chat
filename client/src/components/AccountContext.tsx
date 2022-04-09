@@ -11,12 +11,12 @@ interface User {
     status?: string
 }
 
-type AppContext = {
+interface UserContext {
     user: UserInitialState | User
     setUser: React.Dispatch<React.SetStateAction<UserInitialState | User>>
 }
 
-export const AccountContext = createContext<AppContext | null>(null);
+export const AccountContext = createContext<UserContext>({} as UserContext);
 
 interface ComponentProps {
     children: ReactNode

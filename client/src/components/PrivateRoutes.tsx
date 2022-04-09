@@ -3,10 +3,7 @@ import {FC, useContext} from "react";
 import {AccountContext} from "./AccountContext";
 
 const useAuth = () => {
-    const ctx = useContext(AccountContext);
-    if (!ctx) return null;
-    const {user} = ctx;
-
+    const {user} = useContext(AccountContext);
     return user && user.loggedIn;
 }
 
