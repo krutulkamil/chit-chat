@@ -4,58 +4,39 @@ import {Server} from 'socket.io';
 import helmet from 'helmet';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes';
-import session from 'express-session';
-import connectRedis from 'connect-redis';
 import 'dotenv/config';
-import redisClient from "./redis";
+import {sessionMiddleware, wrap, corsConfig} from "./controllers/serverController";
 
+// express config
 const app: Application = express();
 const port = 4000;
 
+// socket.io config
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors: {
-        origin: "http://localhost:3000",
-        credentials: true
-    }
+    cors: corsConfig
 });
 
-const RedisStore = connectRedis(session);
-
+// middlewares
 app.use(helmet());
-app.use(cors({
-    origin: "http://localhost:3000",
-    credentials: true
-}));
+app.use(cors(corsConfig));
 app.use(express.json());
-app.use(session({
-    secret: process.env.COOKIE_SECRET!,
-    name: "sid",
-    store: new RedisStore({client: redisClient}),
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: process.env.ENVIRONMENT === "production" ? true : "auto",
-        httpOnly: true,
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-        sameSite: process.env.ENVIRONMENT === "production" ? "none" : "lax",
-    }
-}));
-app.use(express.urlencoded({ extended: true }));
+app.use(sessionMiddleware);
 
+// routes
 app.use("/auth", authRoutes);
 
-io.on('connect', (socket) => {});
+// socket.io
+io.use(wrap(sessionMiddleware));
+io.on('connect', (socket) => {
+    console.log(socket.id);
+    // @ts-ignore
+    console.log(socket.request.session.user.username);
+});
 
-app.get("/", async (req: Request, res: Response): Promise<Response> => {
-        return res.status(200).send({
-            message: "Hello World!",
-        });
-    }
-);
-
+// connect!
 try {
-    app.listen(port, (): void => {
+    server.listen(port, (): void => {
         console.log(`Connected successfully on port ${port}`);
     });
 } catch (error) {
