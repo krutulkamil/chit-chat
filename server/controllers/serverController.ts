@@ -3,8 +3,6 @@ import session from "express-session";
 import redisClient from "../redis";
 import connectRedis from "connect-redis";
 import {Socket} from "socket.io";
-import {DefaultEventsMap} from "socket.io/dist/typed-events";
-import {ExtendedError} from "socket.io/dist/namespace";
 
 const RedisStore = connectRedis(session);
 
@@ -22,10 +20,8 @@ export const sessionMiddleware = session({
     }
 });
 
-export const wrap = (expressMiddleware: Function) =>
-    (socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>, next: (err?: (ExtendedError | undefined))
-        => void) => expressMiddleware(socket.request, {}, next);
-
+export const wrap = (expressMiddleware: Function) => (socket: Socket, next: Function) =>
+    expressMiddleware(socket.request, {}, next);
 
 export const corsConfig = {
     origin: "http://localhost:3000",

@@ -1,11 +1,13 @@
 import express, { Application, Request, Response } from "express";
 import * as http from 'http';
-import {Server} from 'socket.io';
+import {Server, Socket} from 'socket.io';
 import helmet from 'helmet';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes';
 import 'dotenv/config';
 import {sessionMiddleware, wrap, corsConfig} from "./controllers/serverController";
+import {SessionSocket} from "./controllers/authController";
+import {authorizeUser} from "./controllers/socketController";
 
 // express config
 const app: Application = express();
@@ -28,10 +30,10 @@ app.use("/auth", authRoutes);
 
 // socket.io
 io.use(wrap(sessionMiddleware));
-io.on('connect', (socket) => {
+io.use(authorizeUser);
+io.on('connect', (socket: SessionSocket) => {
     console.log(socket.id);
-    // @ts-ignore
-    console.log(socket.request.session.user.username);
+    console.log(socket.request.session!.user.username);
 });
 
 // connect!

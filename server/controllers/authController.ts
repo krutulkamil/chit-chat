@@ -1,6 +1,9 @@
 import {Request, Response} from "express";
 import pool from "../db";
 import bcrypt from "bcrypt";
+import {IncomingMessage} from "http";
+import {SessionData} from "express-session";
+import {Socket} from "socket.io";
 
 interface User {
     username: string;
@@ -11,6 +14,14 @@ declare module 'express-session' {
     interface SessionData {
         user: User;
     }
+}
+
+interface SessionIncomingMessage extends IncomingMessage {
+    session?: SessionData
+}
+
+export interface SessionSocket extends Socket {
+    request: SessionIncomingMessage
 }
 
 export const handleLogin = async (req: Request, res: Response) => {
