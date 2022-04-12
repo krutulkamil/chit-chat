@@ -4,10 +4,11 @@ import bcrypt from "bcrypt";
 import {IncomingMessage} from "http";
 import {SessionData} from "express-session";
 import {Socket} from "socket.io";
-
+import { v4 as uuidv4 } from 'uuid';
 interface User {
     username: string;
     id: number;
+    userid: string;
 }
 
 declare module 'express-session' {
@@ -22,6 +23,7 @@ interface SessionIncomingMessage extends IncomingMessage {
 
 export interface SessionSocket extends Socket {
     request: SessionIncomingMessage
+    user?: User;
 }
 
 export const handleLogin = async (req: Request, res: Response) => {
@@ -34,7 +36,7 @@ export const handleLogin = async (req: Request, res: Response) => {
 
 export const attemptLogin = async (req: Request, res: Response) => {
     const potentialLogin = await pool.query(
-        "SELECT id, username, passhash FROM users u WHERE u.username=$1",
+        "SELECT id, username, passhash, userid FROM users u WHERE u.username=$1",
         [req.body.username]);
 
     if (potentialLogin.rowCount > 0) {
@@ -42,7 +44,8 @@ export const attemptLogin = async (req: Request, res: Response) => {
         if (isSamePass) {
             req.session.user = {
                 username: req.body.username,
-                id: potentialLogin.rows[0].id
+                id: potentialLogin.rows[0].id,
+                userid: potentialLogin.rows[0].userid
             }
             res.json({loggedIn: true, username: req.body.username});
         } else {
@@ -61,15 +64,17 @@ export const attemptRegister = async (req: Request, res: Response) => {
         // register
         const hashedPass = await bcrypt.hash(req.body.password, 10);
         const newUserQuery = await pool.query(
-            'INSERT INTO users (username, passhash) VALUES($1, $2) RETURNING id, username',
-            [req.body.username, hashedPass]);
+            'INSERT INTO users (username, passhash, userid) VALUES($1, $2, $3) RETURNING id, username, userid',
+            [req.body.username, hashedPass, uuidv4()]);
 
         req.session.user = {
             username: req.body.username,
-            id: newUserQuery.rows[0].id
+            id: newUserQuery.rows[0].id,
+            userid: newUserQuery.rows[0].userid
         };
 
         res.json({loggedIn: true, username: req.body.username});
+
     } else {
         res.json({loggedIn: false, status: "Username taken"});
     }
