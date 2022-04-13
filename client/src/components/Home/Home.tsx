@@ -4,22 +4,7 @@ import Chat from "./Chat";
 import React, {createContext, ReactNode, useState} from "react";
 import useSocketSetup from "./useSocketSetup";
 
-const initialData = [
-    {
-        username: "Kamil Krutul",
-        connected: false
-    },
-    {
-        username: "Karolina Skibińska",
-        connected: true
-    },
-    {
-        username: "John Doe",
-        connected: true
-    }
-];
-
-interface User {
+export interface User {
     username: string;
     connected: boolean;
 }
@@ -29,11 +14,13 @@ export type FriendsContext = {
     setFriendList: React.Dispatch<React.SetStateAction<User[]>>
 }
 
+//TODO: setFriendsList User model to be changed?
+
 export const FriendContext = createContext<FriendsContext>({} as FriendsContext);
 
 const Home = () => {
-    const [friendList, setFriendList] = useState<User[] | []>(initialData);
-    useSocketSetup();
+    const [friendList, setFriendList] = useState<User[] | []>([]);
+    useSocketSetup(setFriendList);
 
     return (
 

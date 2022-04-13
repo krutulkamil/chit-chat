@@ -7,7 +7,7 @@ import authRoutes from './routes/authRoutes';
 import 'dotenv/config';
 import {sessionMiddleware, wrap, corsConfig} from "./controllers/serverController";
 import {SessionSocket} from "./controllers/authController";
-import {authorizeUser} from "./controllers/socketController";
+import {addFriend, authorizeUser, initializeUser} from "./controllers/socketController";
 
 // express config
 const app: Application = express();
@@ -32,8 +32,10 @@ app.use("/auth", authRoutes);
 io.use(wrap(sessionMiddleware));
 io.use(authorizeUser);
 io.on('connect', (socket: SessionSocket) => {
-    console.log("USERID:", socket.user!.userid);
-    console.log("USERNAME:", socket.user!.username);
+    initializeUser(socket);
+    socket.on("add_friend", (friendName, cb) => {
+        addFriend(socket, friendName, cb);
+    });
 });
 
 // connect!
