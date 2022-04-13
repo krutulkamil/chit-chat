@@ -6,7 +6,7 @@ import useSocketSetup from "./useSocketSetup";
 
 export interface User {
     username: string;
-    connected: boolean;
+    connected: string;
 }
 
 export type FriendsContext = {
@@ -23,7 +23,6 @@ const Home = () => {
     useSocketSetup(setFriendList);
 
     return (
-
         <FriendContext.Provider value={{friendList, setFriendList}}>
             <Grid templateColumns="repeat(10, 1fr)" h="100vh" as={Tabs}>
                 <GridItem colSpan={3} borderRight="1px solid grey">

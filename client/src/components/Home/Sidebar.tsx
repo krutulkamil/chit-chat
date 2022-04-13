@@ -8,6 +8,8 @@ const Sidebar = () => {
     const {friendList} = useContext(FriendContext);
     const {isOpen, onOpen, onClose} = useDisclosure();
 
+    console.log(friendList)
+
     return (
         <>
             <VStack py="1.4rem">
@@ -19,10 +21,10 @@ const Sidebar = () => {
                 </HStack>
                 <Divider/>
                 <VStack as={TabList}>
-                    {friendList!.map((friend) => (
-                        <HStack key={`friend:${friend}`} as={Tab}>
+                    {friendList && friendList.map((friend) => (
+                        <HStack key={`friend:${friend.username}`} as={Tab}>
                             <Circle bg={friend.connected ? "green.700" : "red.500"} size="20px"/>
-                            <Text>{friend}</Text>
+                            <Text>{friend.username}</Text>
                         </HStack>
                     ))}
                 </VStack>

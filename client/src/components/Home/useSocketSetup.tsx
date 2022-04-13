@@ -11,6 +11,18 @@ const useSocketSetup = (setFriendList: Dispatch<SetStateAction<[] | User[]>>) =>
         socket.on('friends', friendList => {
             setFriendList(friendList);
         });
+
+        socket.on("connected", (status, username) => {
+            setFriendList(prevFriends => {
+                return [...prevFriends].map(friend => {
+                    if (friend.username === username) {
+                        friend.connected = status;
+                    }
+                    return friend;
+                });
+            });
+        });
+
         socket.on("connect_error", () => {
             setUser({loggedIn: false});
         });
@@ -19,7 +31,7 @@ const useSocketSetup = (setFriendList: Dispatch<SetStateAction<[] | User[]>>) =>
             socket.off("connect_error");
         };
 
-    }, [setUser]);
+    }, [setUser, setFriendList]);
 };
 
 export default useSocketSetup;

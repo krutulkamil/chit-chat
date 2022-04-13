@@ -13,7 +13,7 @@ import {
 import * as Yup from "yup";
 import {Form, Formik} from "formik";
 import socket from "../../socket";
-import {FriendContext} from "./Home";
+import {FriendContext, User} from "./Home";
 
 interface ComponentProps {
     isOpen: boolean
@@ -47,11 +47,11 @@ const AddFriendModal: FC<ComponentProps> = ({isOpen, onClose}) => {
                     onSubmit={(values, actions) => {
                         socket.emit("add_friend", values.friendName, ({
                                                                           errorMsg,
-                                                                          done
-                                                                      }: { errorMsg: string, done: boolean }) => {
+                                                                          done,
+                                                                          newFriend
+                                                                      }: { errorMsg: string, done: boolean, newFriend: User }) => {
                             if (done) {
-                                // @ts-ignore
-                                setFriendList(c => [values.friendName, ...c])
+                                setFriendList(c => [newFriend, ...c])
                                 closeModal();
                                 return;
                             }
