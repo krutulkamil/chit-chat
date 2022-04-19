@@ -1,4 +1,4 @@
-import express, { Application, Request, Response } from "express";
+import express, { Application } from "express";
 import * as http from 'http';
 import {Server, Socket} from 'socket.io';
 import helmet from 'helmet';
@@ -6,14 +6,16 @@ import cors from 'cors';
 import authRoutes from './routes/authRoutes';
 import 'dotenv/config';
 import {sessionMiddleware, wrap, corsConfig} from "./controllers/serverController";
+
 import {SessionSocket} from "./controllers/authController";
-import {addFriend, authorizeUser, initializeUser, onDisconnect} from "./controllers/socketController";
+import {addFriend, authorizeUser, dm, initializeUser, onDisconnect} from "./controllers/socketController";
+import {Message} from "./controllers/socketio/dm";
 
 // express config
 const app: Application = express();
 const port = 4000;
 
-// socket.io config
+// socketio config
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: corsConfig
@@ -28,7 +30,7 @@ app.use(sessionMiddleware);
 // routes
 app.use("/auth", authRoutes);
 
-// socket.io
+// socketio
 io.use(wrap(sessionMiddleware));
 io.use(authorizeUser);
 io.on('connect', (socket: SessionSocket) => {
@@ -36,6 +38,10 @@ io.on('connect', (socket: SessionSocket) => {
 
     socket.on("add_friend", (friendName, cb) => {
         addFriend(socket, friendName, cb);
+    });
+
+    socket.on("dm", (message: Message) => {
+        dm(socket, message)
     });
 
     socket.on("disconnecting", () => onDisconnect(socket));

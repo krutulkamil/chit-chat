@@ -1,7 +1,9 @@
 import {io} from "socket.io-client";
+import {User} from "./components/Home/Home";
+import {UserInitialState} from "./components/AccountContext";
 
-const socket = io("http://localhost:4000", {
-    autoConnect: false,
+const socket = (user: any) => io("http://localhost:4000", {
+    autoConnect: true,
     withCredentials: true
 });
 

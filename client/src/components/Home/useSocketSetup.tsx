@@ -1,18 +1,26 @@
 import {Dispatch, SetStateAction, useContext, useEffect} from "react";
-import socket from "../../socket";
 import {AccountContext} from "../AccountContext";
-import {User} from "./Home";
+import {Message, User} from "./Home";
+import {Socket} from "socket.io-client";
 
-const useSocketSetup = (setFriendList: Dispatch<SetStateAction<[] | User[]>>) => {
+const useSocketSetup = (setFriendList: Dispatch<SetStateAction<[] | User[]>>, setMessages: Dispatch<SetStateAction<[] | Message[]>>,socket: Socket) => {
     const {setUser} = useContext(AccountContext);
 
     useEffect(() => {
         socket.connect();
-        socket.on('friends', friendList => {
+        socket.on('friends', (friendList: User[]) => {
             setFriendList(friendList);
         });
 
-        socket.on("connected", (status, username) => {
+        socket.on('messages', (messages: Message[]) => {
+            setMessages(messages);
+        });
+
+        socket.on("dm", message => {
+            setMessages(prevMsgs => [message, ...prevMsgs]);
+        })
+
+        socket.on("connected", (status: string, username: string) => {
             setFriendList(prevFriends => {
                 return [...prevFriends].map(friend => {
                     if (friend.username === username) {
@@ -29,9 +37,13 @@ const useSocketSetup = (setFriendList: Dispatch<SetStateAction<[] | User[]>>) =>
 
         return () => {
             socket.off("connect_error");
+            socket.off("connected");
+            socket.off("friends");
+            socket.off("messages");
+            socket.off("dm");
         };
 
-    }, [setUser, setFriendList]);
+    }, [setUser, setFriendList, setMessages, socket]);
 };
 
 export default useSocketSetup;

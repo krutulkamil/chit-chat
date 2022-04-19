@@ -1,5 +1,5 @@
 import {Request, Response, NextFunction} from "express";
-import redisClient from "../redis";
+import redisClient from "../../redis";
 
 export const rateLimiter = (secondsLimit: number, limitAmount: number) => {
     return async (req: Request, res: Response, next: NextFunction) => {

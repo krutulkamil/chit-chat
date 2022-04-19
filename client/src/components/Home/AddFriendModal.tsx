@@ -12,8 +12,7 @@ import {
 } from "@chakra-ui/react";
 import * as Yup from "yup";
 import {Form, Formik} from "formik";
-import socket from "../../socket";
-import {FriendContext, User} from "./Home";
+import {FriendContext, SocketContext, User} from "./Home";
 
 interface ComponentProps {
     isOpen: boolean
@@ -29,6 +28,8 @@ const AddFriendModal: FC<ComponentProps> = ({isOpen, onClose}) => {
         }, [onClose],
     );
     const {setFriendList} = useContext(FriendContext);
+    // @ts-ignore
+    const { socket } = useContext(SocketContext);
     return (
         <Modal isOpen={isOpen} onClose={closeModal} isCentered>
             <ModalOverlay/>

@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router-dom";
 
-interface UserInitialState {
+export interface UserInitialState {
     loggedIn: false | null;
 }
 
